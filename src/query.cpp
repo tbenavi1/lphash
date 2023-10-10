@@ -50,7 +50,11 @@ int query(int argc, char* argv[]) {
     uint64_t total_kmers_streaming_on = 0;
     while (kseq_read(seq) >= 0) {
         auto hashes = hf(seq->seq.s, seq->seq.l, streaming_on);
-        total_kmers_streaming_on += hashes.size();
+        for (auto hash:hashes)
+	{
+		std::cout << hash << std::endl;
+	}
+	total_kmers_streaming_on += hashes.size();
         essentials::do_not_optimize_away(hashes.data());
     }
     t.stop();
@@ -60,30 +64,30 @@ int query(int argc, char* argv[]) {
 
     t.reset();
 
-    if ((fp = gzopen(query_filename.c_str(), "r")) == NULL) {
-        std::cerr << "Unable to open the input file " << query_filename << "\n";
-        return 2;
-    }
-    seq = kseq_init(fp);
-    t.start();
-    constexpr bool streaming_off = false;
-    uint64_t total_kmers_streaming_off = 0;
-    while (kseq_read(seq) >= 0) {
-        auto hashes = hf(seq->seq.s, seq->seq.l, streaming_off);
-        total_kmers_streaming_off += hashes.size();
-        essentials::do_not_optimize_away(hashes.data());
-    }
-    t.stop();
-    if (seq) kseq_destroy(seq);
-    gzclose(fp);
-    uint64_t time_streaming_off = t.elapsed();
+//    if ((fp = gzopen(query_filename.c_str(), "r")) == NULL) {
+//        std::cerr << "Unable to open the input file " << query_filename << "\n";
+//        return 2;
+//    }
+//    seq = kseq_init(fp);
+//    t.start();
+//    constexpr bool streaming_off = false;
+//    uint64_t total_kmers_streaming_off = 0;
+//    while (kseq_read(seq) >= 0) {
+//        auto hashes = hf(seq->seq.s, seq->seq.l, streaming_off);
+//        total_kmers_streaming_off += hashes.size();
+//        essentials::do_not_optimize_away(hashes.data());
+//    }
+//    t.stop();
+//    if (seq) kseq_destroy(seq);
+//    gzclose(fp);
+//    uint64_t time_streaming_off = t.elapsed();
 
-    assert(total_kmers_streaming_on == total_kmers_streaming_off);
+//    assert(total_kmers_streaming_on == total_kmers_streaming_off);
 
-    std::cout << query_filename << "," << mphf_filename << "," << total_kmers_streaming_on << ","
-              << static_cast<double>(time_streaming_on * 1000) / total_kmers_streaming_on << ","
-              << static_cast<double>(time_streaming_off * 1000) / total_kmers_streaming_off
-              << std::endl;
+//    std::cout << query_filename << "," << mphf_filename << "," << total_kmers_streaming_on << ","
+//              << static_cast<double>(time_streaming_on * 1000) / total_kmers_streaming_on << ","
+//              << static_cast<double>(time_streaming_off * 1000) / total_kmers_streaming_off
+//              << std::endl;
     return 0;
 }
 
